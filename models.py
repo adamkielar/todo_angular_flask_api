@@ -6,8 +6,19 @@ from peewee import *
 
 import config
 
+DATABASE = 'todos.db'
+
+database = SqliteDatabase(DATABASE)
+
+
+class Todo(Model):
+    name = CharField(max_length=250)
+    url = CharField(unique=True)
+    created_at = DateTimeField(datetime=datetime.datetime.now)
+
+    class Meta:
+        database = database
 
 def initialize():
-    DATABASE.connect(reuse_if_open=True)
-    DATABASE.create_tables([Todo], safe=True)
-    DATABASE.close()
+    with database:
+        database.create_tables([Todo], safe=True)
