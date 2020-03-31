@@ -1,3 +1,4 @@
 env
 .vscode
 todos.db
+.idea
