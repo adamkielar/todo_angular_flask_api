@@ -16,8 +16,8 @@ import models
 todo_fields = {
     "id": fields.Integer,
     "name": fields.String,
-    "uri": fields.Url,
-    "created_at": fields.DateTime,
+    "completed": fields.Boolean,
+    "edited": fields.Boolean,
 }
 
 
@@ -30,19 +30,26 @@ class TodoList(Resource):
             help="No todo name provided",
             location=["form", "json"],
         )
+        self.reqparse.add_argument(
+            "completed", 
+            type=inputs.boolean, 
+            location=["form", "json"],
+        )
         super().__init__()
 
-    @marshal_with(todo_fields)
+
     def get(self):
-        todos = [todo for todo in models.Todo.select()]
-        return {"todos": todos}
+        return [marshal(todo, todo_fields) for todo in models.Todo.select()], 200
+
 
     @marshal_with(todo_fields)
     def post(self):
         args = self.reqparse.parse_args()
         todo = models.Todo.create(**args)
-        return (201, {'Location': url_for('resources.todos.todo', id=todo.id)})
+        return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})
+
 
 todos_api = Blueprint("resources.todos", __name__)
 api = Api(todos_api)
 api.add_resource(TodoList, "/todos", endpoint="todos")
+api.add_resource(TodoList, "/todos/<int:id>", endpoint="todo")
