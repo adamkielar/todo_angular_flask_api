@@ -34,7 +34,6 @@ class TodoModelTestCase(unittest.TestCase):
     def test_todo_creation(self):
         Todo.create(
             name='run today',
-            url='run-today',
         )
 
         self.assertEqual(Todo.select().count(), 1)
@@ -55,6 +54,7 @@ class AppViewsTestCase(ViewTestCase):
     def test_my_todos_view(self):
         rv = self.app.get("/")
         self.assertIn("todolistapp", rv.get_data(as_text=True).lower())
+
 
 
 if __name__ == '__main__':
