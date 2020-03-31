@@ -20,6 +20,13 @@ todo_fields = {
     "edited": fields.Boolean,
 }
 
+def todo_or_404(todo_id):
+    try:
+        todo = models.Todo.get(models.Todo.id == todo_id)
+    except models.Todo.DoesNotExist:
+        abort(404)
+    else:
+        return todo
 
 class TodoList(Resource):
     def __init__(self):
@@ -47,6 +54,29 @@ class TodoList(Resource):
         args = self.reqparse.parse_args()
         todo = models.Todo.create(**args)
         return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})
+
+
+class Todo(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            "name",
+            required=True,
+            help="No todo name provided",
+            location=["form", "json"],
+        )
+        self.reqparse.add_argument(
+            "completed", 
+            type=inputs.boolean, 
+            location=["form", "json"],
+        )
+        super().__init__()
+
+    @marshal_with(todo_fields)
+    def get(self, id):
+        return todo_or_404(id)
+
+    @marshal_with(todo_fields)
 
 
 todos_api = Blueprint("resources.todos", __name__)
