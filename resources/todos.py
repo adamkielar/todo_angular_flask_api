@@ -20,6 +20,7 @@ todo_fields = {
     "edited": fields.Boolean,
 }
 
+
 def todo_or_404(todo_id):
     try:
         todo = models.Todo.get(models.Todo.id == todo_id)
@@ -27,6 +28,7 @@ def todo_or_404(todo_id):
         abort(404)
     else:
         return todo
+
 
 class TodoList(Resource):
     def __init__(self):
@@ -38,22 +40,20 @@ class TodoList(Resource):
             location=["form", "json"],
         )
         self.reqparse.add_argument(
-            "completed", 
-            type=inputs.boolean, 
+            "completed",
+            type=inputs.boolean,
             location=["form", "json"],
         )
         super().__init__()
 
-
     def get(self):
         return [marshal(todo, todo_fields) for todo in models.Todo.select()], 200
-
 
     @marshal_with(todo_fields)
     def post(self):
         args = self.reqparse.parse_args()
         todo = models.Todo.create(**args)
-        return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})
+        return todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)}
 
 
 class Todo(Resource):
@@ -66,8 +66,8 @@ class Todo(Resource):
             location=["form", "json"],
         )
         self.reqparse.add_argument(
-            "completed", 
-            type=inputs.boolean, 
+            "completed",
+            type=inputs.boolean,
             location=["form", "json"],
         )
         super().__init__()
@@ -77,9 +77,21 @@ class Todo(Resource):
         return todo_or_404(id)
 
     @marshal_with(todo_fields)
+    def put(self, id):
+        args = self.reqparse.parse_args()
+        query = models.Todo.update(**args).where(models.Todo.id == id)
+        query.execute()
+        todo = todo_or_404(id)
+        return todo, 200, {'Location': url_for('resources.todos.todo', id=id)}
+
+    @marshal_with(todo_fields)
+    def delete(self, id):
+        query = models.Todo.delete().where(models.Todo.id == id)
+        query.execute()
+        return '', 204, {'Location': url_for('resources.todos.todos')}
 
 
 todos_api = Blueprint("resources.todos", __name__)
 api = Api(todos_api)
 api.add_resource(TodoList, "/todos", endpoint="todos")
-api.add_resource(TodoList, "/todos/<int:id>", endpoint="todo")
+api.add_resource(Todo, "/todos/<int:id>", endpoint="todo")
