@@ -1,4 +1,4 @@
-from flask import jsonify, Blueprint, abort
+from flask import Blueprint, abort
 
 from flask_restful import (
     Resource,
@@ -22,6 +22,7 @@ todo_fields = {
 
 
 def todo_or_404(todo_id):
+    """Check if item exist"""
     try:
         todo = models.Todo.get(models.Todo.id == todo_id)
     except models.Todo.DoesNotExist:
@@ -31,6 +32,7 @@ def todo_or_404(todo_id):
 
 
 class TodoList(Resource):
+    """Get Todo list and add new Todo"""
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
@@ -57,6 +59,7 @@ class TodoList(Resource):
 
 
 class Todo(Resource):
+    """Get, update and delete single Todo"""
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(

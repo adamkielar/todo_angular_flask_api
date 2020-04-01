@@ -1,5 +1,5 @@
 import json
-from flask import Flask, g, jsonify, render_template
+from flask import Flask, render_template
 from flask_cors import CORS
 
 import config

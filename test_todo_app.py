@@ -10,19 +10,21 @@ test_db = SqliteDatabase(':memory:')
 
 
 class TestDatabase(unittest.TestCase):
+    """Test database state, open and close"""
     database = test_db
 
     def test_connection(self):
-        conn = self.database.connection()
+        self.database.connection()
         self.assertFalse(self.database.is_closed())
         self.database.close()
         self.assertTrue(self.database.is_closed())
-        conn = self.database.connection()
+        self.database.connection()
         self.assertFalse(self.database.is_closed())
         self.database.close()
 
 
 class TodoModelTestCase(unittest.TestCase):
+    """Test creating model item"""
     def setUp(self):
         test_db.bind([Todo])
         test_db.connect()
@@ -40,7 +42,8 @@ class TodoModelTestCase(unittest.TestCase):
         test_db.close()
 
 
-class ViewTestCase(unittest.TestCase):
+class ViewApiTestCase(unittest.TestCase):
+    """Test for View and Api"""
     def setUp(self):
         todo_app.app.testing = True
         self.app = todo_app.app.test_client()
@@ -61,13 +64,15 @@ class ViewTestCase(unittest.TestCase):
         test_db.close()
 
 
-class AppViewsTestCase(ViewTestCase):
+class AppViewsTestCase(ViewApiTestCase):
+    """Test my_todo view, main view"""
     def test_my_todos_view(self):
         response = self.app.get("/")
         self.assertIn("My TODOs!", response.get_data(as_text=True))
 
 
-class ApiTestCase(ViewTestCase):
+class ApiTestCase(ViewApiTestCase):
+    """Test of Api, get, post, put, delete methods"""
     def test_get_todo_list(self):
         response = self.app.get("/api/v1/todos")
         self.assertEqual(response.status_code, 200)
