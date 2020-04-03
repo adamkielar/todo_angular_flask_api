@@ -1,7 +1,5 @@
 import datetime
 
-from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
-                          BadSignature, SignatureExpired)
 from peewee import *
 
 import config
